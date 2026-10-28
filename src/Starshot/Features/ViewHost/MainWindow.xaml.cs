@@ -12,7 +12,6 @@ using Starshot.Features.About;
 using Starshot.Features.Background;
 using Starshot.Features.Screenshot;
 using Starshot.Features.Setting;
-using Starshot.Features.Update;
 using Starshot.Frameworks;
 using Starshot.Helpers;
 using Vanara.PInvoke;
@@ -121,7 +120,6 @@ public sealed partial class MainWindow : WindowEx
                 AppConfig.TaskInvalid = false;
                 InAppToast.MainWindow?.Warning(null, Lang.Starshot_TaskInvalid, 5000);
             }
-            StartupUpdateCheck.FlushPending();
         };
         sb.Begin();
     }
@@ -165,8 +163,6 @@ public sealed partial class MainWindow : WindowEx
             presenter.Maximize();
         }
         NavView.SelectedItem = NavView.MenuItems[Math.Clamp(AppConfig.StartPage, 0, 1)];
-        // 主窗口从托盘重新打开时补弹后台检查挂起的新版本（首次启动由 splash 结束处的 FlushPending 负责）
-        StartupUpdateCheck.FlushPending();
     }
 
     private void NavView_SelectionChanged(

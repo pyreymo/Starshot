@@ -75,10 +75,9 @@ public sealed partial class RegionCaptureWindow : WindowEx
     private bool _ownsDisplayBitmap;
     private bool _cleanedUp;
 
-    // 关窗移屏外方案配套：截图前的前台窗口（关窗时还焦点）、待移回屏内标记与节拍计数
+    // 关窗移屏外方案配套：截图前的前台窗口（关窗时还焦点）、待移回屏内标记
     private nint _prevForeground;
     private bool _pendingMoveIn;
-    private int _moveInTick;
 
     // 原生兜底覆盖进程内首次完成光标交接前的截图会话；真实物理移动后不再启用。
     // 如果首次会话未发生物理移动就结束，后续会话仍可继续尝试。
@@ -168,7 +167,7 @@ public sealed partial class RegionCaptureWindow : WindowEx
     /// <summary>
     /// 每次截图调用：更新冻结帧 + 重置交互状态 + 显示。窗口单例且永不 Hide——
     /// 关窗时移到屏外保持 IsWindowVisible（合成管线不停摆），下次截图先把新帧 Present 上屏
-    /// 再移回屏内，从根上避免 Show 瞬间 DWM 先合成保留的旧会话帧（启动闪上次截图界面）。
+    /// 再移回屏内，避免 Show 瞬间显示保留的旧会话帧。
     /// </summary>
     public void SetCapture(CanvasBitmap canvas, float sdrWhiteLevel, int physW, int physH)
     {
@@ -238,8 +237,7 @@ public sealed partial class RegionCaptureWindow : WindowEx
         _isClosed = false;
         _renderTimer.Start();
         Redraw(); // 屏外先把新冻结帧 Present 上屏（窗口可见，合成照常提交）
-        _pendingMoveIn = true; // 第 2 个 tick（新帧确定已合成）再移回屏内，移回瞬间不可能是旧内容
-        _moveInTick = 0;
+        _pendingMoveIn = true; // 下一个 tick 再移回屏内，给新帧合成留出时间
     }
 
     private static CanvasBitmap CreateDisplayBitmap(
@@ -585,15 +583,11 @@ public sealed partial class RegionCaptureWindow : WindowEx
         }
         _swapChain.Present();
 
-        // SetCapture 挂的移回任务：第 2 个 tick（首帧 Present 已过 16ms，新帧确定合成进 surface）移回屏内
+        // 首帧在屏外 Present 后，等待一个 tick 再移回屏内。
         if (_pendingMoveIn)
         {
-            _moveInTick++;
-            if (_moveInTick >= 2)
-            {
-                _pendingMoveIn = false;
-                MoveOnscreen();
-            }
+            _pendingMoveIn = false;
+            MoveOnscreen();
         }
     }
 
@@ -933,7 +927,7 @@ public sealed partial class RegionCaptureWindow : WindowEx
         Completion?.TrySetResult(IsConfirmed);
     }
 
-    /// <summary>移回虚拟屏幕原位（SetCapture 后第 2 个 tick 调：新帧已合成，移回瞬间不闪旧内容）。</summary>
+    /// <summary>首帧在屏外提交后，将覆盖层移回虚拟屏幕原位。</summary>
     private void MoveOnscreen()
     {
         int vx = User32.GetSystemMetrics((User32.SystemMetric)76);

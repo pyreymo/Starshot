@@ -12,7 +12,6 @@ using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Win32;
 using Starshot.Features.Codec;
 using Starshot.Features.Telemetry;
-using Starshot.Features.Update;
 using Starshot.Frameworks;
 using Starshot.Helpers;
 using Starshot.Language;
@@ -79,12 +78,6 @@ public sealed partial class GeneralSetting : PageBase
     public GeneralSetting()
     {
         InitializeComponent();
-        // 安装版线：更新源在 kachina config 写死，只藏源选择；
-        // GitHub 直连开关保留——release notes 仍走 GitHub API 拉取
-        if (AppConfig.Installer)
-        {
-            Segmented_UpdateSource.Visibility = Visibility.Collapsed;
-        }
         s_activeInstance = this;
         LoadShieldIcon();
     }
@@ -337,12 +330,6 @@ public sealed partial class GeneralSetting : PageBase
         OnPropertyChanged(nameof(AutoStartStatusBrush));
     }
 
-    public int UpdateSource
-    {
-        get => AppConfig.UpdateSource;
-        set => AppConfig.UpdateSource = value;
-    }
-
     /// <summary>
     /// 每次启动把进程提升为高优先级（应用自设，与启动方式无关）。改后重启生效。
     /// </summary>
@@ -352,19 +339,6 @@ public sealed partial class GeneralSetting : PageBase
         set
         {
             AppConfig.HighPriorityProcess = value;
-            InAppToast.MainWindow?.Information(null, Lang.Starshot_RestartToTakeEffect, 3000);
-        }
-    }
-
-    /// <summary>
-    /// GitHub API 不走系统代理（仅 GitHub 源生效；CDN 源走系统代理不受影响）。改后重启生效。
-    /// </summary>
-    public bool GithubApiNoProxy
-    {
-        get => AppConfig.EnableGithubApiNoProxy;
-        set
-        {
-            AppConfig.EnableGithubApiNoProxy = value;
             InAppToast.MainWindow?.Information(null, Lang.Starshot_RestartToTakeEffect, 3000);
         }
     }
@@ -585,7 +559,7 @@ public sealed partial class GeneralSetting : PageBase
         });
         try
         {
-            await UpdateService.ExtractToDirectoryAsync(
+            await ArchiveDownloader.ExtractToDirectoryAsync(
                 url,
                 dest,
                 progress,

@@ -266,9 +266,7 @@ public static class TelemetryService
             (
                 AppConfig.AppVersion,
                 AppConfig.Installer ? "installer" : "portable",
-                AppConfig.Installer ? "installer"
-                : AppConfig.UpdateSource == 0 ? "cdn"
-                : "github",
+                "none",
                 AnyHdrDisplay(),
                 CountDisplays(),
                 AppConfig.Language

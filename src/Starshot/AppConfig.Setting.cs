@@ -233,7 +233,7 @@ public static partial class AppConfig
 
     /// <summary>
     /// 分发线身份：打包阶段烙在主程序 exe DOS stub（偏移 0x40）里的标志，CI 只对 kachina 安装版产物写入。
-    /// 启动读一次缓存；便携版 exe 无标志恒 false。true 时更新拉起 Starshot.Update.exe、隐藏便携专属 UI。
+    /// 启动读一次缓存；便携版 exe 无标志恒 false。
     /// </summary>
     public static bool Installer => _installer ??= ReadInstallerFlag();
 
@@ -251,42 +251,6 @@ public static partial class AppConfig
         {
             return false;
         }
-    }
-
-    /// <summary>
-    /// 检查更新时包含预览版（默认只看正式版）。
-    /// </summary>
-    public static bool EnablePreReleaseUpdateCheck
-    {
-        get => GetValue(false);
-        set => SetValue(value);
-    }
-
-    /// <summary>
-    /// GitHub API（api.github.com）不走系统代理（直连）。仅影响 release 查询 API，不影响 zip 下载（CDN）。默认开。
-    /// </summary>
-    public static bool EnableGithubApiNoProxy
-    {
-        get => GetValue(true);
-        set => SetValue(value);
-    }
-
-    /// <summary>
-    /// 跳过的更新版本（用户点「跳过此版本」）
-    /// </summary>
-    public static string? IgnoreVersion
-    {
-        get => GetValue<string?>();
-        set => SetValue(value);
-    }
-
-    /// <summary>
-    /// 更新源：0=Cloudflare CDN（默认，功能更多、国内访问更快），1=GitHub Release。选定后整条更新流程走该源，不跨源回退。
-    /// </summary>
-    public static int UpdateSource
-    {
-        get => GetValue(0);
-        set => SetValue(value);
     }
 
     /// <summary>
@@ -322,7 +286,7 @@ public static partial class AppConfig
     public const string WebSiteUrl = "https://starshot.cialo.site";
 
     /// <summary>
-    /// CDN 更新源基址（UpdateSource=Cloudflare 时用）
+    /// 资源下载 CDN 基址
     /// </summary>
     public const string CdnBase = "https://starshot-release.cialo.site";
 
@@ -335,11 +299,6 @@ public static partial class AppConfig
     /// GitHub 仓库基址（网页版；releases / blob 等链接由此拼接）
     /// </summary>
     public const string RepoBaseUrl = "https://github.com/loliri/Starshot";
-
-    /// <summary>
-    /// GitHub API 基址（查 release 信息用）
-    /// </summary>
-    public const string RepoApiBaseUrl = "https://api.github.com/repos/loliri/Starshot";
 
     /// <summary>
     /// OCR 引擎包 CDN 地址（oneocr.dll + oneocr.onemodel 平铺 zip，供按需下载）

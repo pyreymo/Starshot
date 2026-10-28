@@ -7,7 +7,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Starshot.Features.Update;
 using Starshot.Helpers;
 using Starshot.Language;
 
@@ -245,7 +244,7 @@ public sealed partial class OcrEngineDialog : ContentDialog
                 ProgressPercent = p.percent;
                 ProgressText = p.bytesText;
             });
-            await UpdateService.ExtractToDirectoryAsync(
+            await ArchiveDownloader.ExtractToDirectoryAsync(
                 AppConfig.OcrCdnUrl,
                 AppContext.BaseDirectory,
                 progress,
